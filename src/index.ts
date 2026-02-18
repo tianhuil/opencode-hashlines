@@ -4,7 +4,7 @@
  * A plugin for OpenCode that provides hash-anchored file reading and editing.
  */
 
-export { HashlinePlugin } from "./src/hashline-plugin.js";
+export { HashlinePlugin } from "./hashline-plugin.js";
 
 // Export core hashline functions for direct use
 export {
@@ -15,6 +15,6 @@ export {
   detectLineEnding,
   normalizeToLF,
   stripBom
-} from "./src/lib/hashline.js";
+} from "./lib/hashline.js";
 
-export type { HashlineEdit, HashlineEditSpec, ParsedEdit, HashMismatch, LineRef } from "./src/lib/types.js";
+export type { HashlineEdit, HashlineEditSpec, ParsedEdit, HashMismatch, LineRef } from "./lib/types.js";

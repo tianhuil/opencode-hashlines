@@ -59,11 +59,11 @@ All plugin code lives in the `src/` directory:
 
 ```
 src/
+├── index.ts              # Package entry point (exports)
 ├── hashline-plugin.ts    # Main plugin entry point
 └── lib/
-    ├── hashline.ts        # Core hashline functions
-    ├── schema.ts          # Zod validation schemas
-    └── types.ts           # TypeScript types
+    ├── hashline.ts       # Core hashline functions
+    └── types.ts          # TypeScript types
 ```
 
 ### Local Testing with Symlink
@@ -127,13 +127,13 @@ await hashedit({
       start_hash: "b2",
       end_line: 8,
       end_hash: "c1",
-      new_content: "combined = True"
+      new_text: "combined = True"
     },
     {
       op: "insert_after",
       line: 10,
       hash: "f6",
-      new_content: "# new comment"
+      new_text: "# new comment"
     }
   ]
 })
@@ -141,16 +141,18 @@ await hashedit({
 
 ## Operations
 
-Four edit operations are supported:
+Three edit operations are supported:
 
 1. **set_line** - Replace a single line
 2. **replace_lines** - Replace a contiguous range (use empty `new_content` for deletion)
 3. **insert_after** - Add new content after an anchor line
-4. **replace** - Fuzzy substring match (when line refs are unavailable)
 
 ## References
 
 - [The Harness Problem](https://blog.can.ac/2026/02/12/the-harness-problem/) - Background on hashlines
 - [oh-my-pi](https://github.com/can1357/oh-my-pi) - Original implementation
 - [OpenCode Plugins](https://opencode.ai/docs/plugins/) - Plugin documentation
+
 ## License
+
+MIT

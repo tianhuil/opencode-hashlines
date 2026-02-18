@@ -6,10 +6,10 @@
  */
 
 import type { Plugin } from "@opencode-ai/plugin";
-import { tool } from "@opencode-ai/plugin";
+import { tool, type ToolContext } from "@opencode-ai/plugin/tool";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { resolve } from "path";
-import { z } from "zod";
+
 
 // Import core hashline functions from lib
 import { computeLineHash, formatHashLines, parseLineRef, applyHashlineEdits, detectLineEnding, normalizeToLF, stripBom } from "./lib/hashline.js";
@@ -57,35 +57,36 @@ export const HashlinePlugin: Plugin = async (ctx) => {
         args: {
           path: tool.schema.string().describe("File path"),
           operations: tool.schema.array(
-            z.discriminatedUnion("op", [
+            tool.schema.discriminatedUnion("op", [
               // set_line operation
-              z.object({
-                op: z.literal("set_line").describe("Single line replacement"),
-                line: z.number().describe("Line number"),
-                hash: z.string().describe("2-char hash of current content"),
-                new_text: z.string().describe("New line content (empty to delete)"),
+              tool.schema.object({
+                op: tool.schema.literal("set_line"),
+                line: tool.schema.number().describe("Line number (1-based)"),
+                hash: tool.schema.string().describe("Hash of current line content"),
+                new_text: tool.schema.string().describe('Replacement text — "" to delete'),
               }),
               // replace_lines operation
-              z.object({
-                op: z.literal("replace_lines").describe("Range replacement"),
-                start_line: z.number().describe("Start line number"),
-                start_hash: z.string().describe("Hash of start line"),
-                end_line: z.number().describe("End line number"),
-                end_hash: z.string().describe("Hash of end line"),
-                new_content: z.string().describe("New content (empty to delete)"),
+              tool.schema.object({
+                op: tool.schema.literal("replace_lines"),
+                start_line: tool.schema.number().describe("Start line number (1-based)"),
+                start_hash: tool.schema.string().describe("Hash of start line"),
+                end_line: tool.schema.number().describe("End line number (1-based)"),
+                end_hash: tool.schema.string().describe("Hash of end line"),
+                new_text: tool.schema.string().describe('Replacement text — "" to delete'),
               }),
               // insert_after operation
-              z.object({
-                op: z.literal("insert_after").describe("Insert after line"),
-                line: z.number().describe("Line number to insert after"),
-                hash: z.string().describe("Hash of anchor line"),
-                new_content: z.string().describe("Content to insert"),
+              tool.schema.object({
+                op: tool.schema.literal("insert_after"),
+                line: tool.schema.number().describe("Line number to insert after (1-based)"),
+                hash: tool.schema.string().describe("Hash of anchor line"),
+                new_text: tool.schema.string().describe("Content to insert after the line"),
               }),
             ])
-          ).describe("Edit operations to apply"),
+          ).describe("Edit operations to apply (bottom-to-top order)"),
         },
         async execute(args, context) {
           const filePath = resolve(context.directory, args.path);
+
 
           if (!existsSync(filePath)) {
             throw new Error(`File not found: ${args.path}`);
@@ -110,14 +111,14 @@ export const HashlinePlugin: Plugin = async (ctx) => {
                 replace_lines: {
                   start_anchor: `${op.start_line}:${op.start_hash}`,
                   end_anchor: `${op.end_line}:${op.end_hash}`,
-                  new_text: op.new_content,
+                  new_text: op.new_text,
                 },
               };
             } else if (op.op === "insert_after") {
               return {
                 insert_after: {
                   anchor: `${op.line}:${op.hash}`,
-                  text: op.new_content,
+                  text: op.new_text,
                 },
               };
             }

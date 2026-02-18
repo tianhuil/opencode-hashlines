@@ -29,7 +29,7 @@ export function computeLineHash(idx: number, line: string): string {
   }
   line = line.replace(/\s+/g, ""); // Normalize whitespace
   void idx; // Not used, kept for compatibility
-  return DICT[Bun.hash.xxHash32(line) % HASH_MOD] ?? "00";
+  return DICT[Bun.hash.xxHash32(line) % HASH_MOD]! ?? "00";
 }
 
 /**
@@ -73,13 +73,13 @@ export function parseLineRef(ref: string): { line: number; hash: string } {
   // Strict format: LINE:HASH
   const strictMatch = normalized.match(/^(\d+):([0-9a-zA-Z]{1,16})$/);
   if (strictMatch) {
-    return { line: parseInt(strictMatch[1], 10), hash: strictMatch[2] };
+    return { line: parseInt(strictMatch[1]!, 10), hash: strictMatch[2]! };
   }
 
   // Fallback: extract line number if hash format is invalid
   const looseMatch = normalized.match(/^(\d+):/);
   if (looseMatch) {
-    return { line: parseInt(looseMatch[1], 10), hash: "" };
+    return { line: parseInt(looseMatch[1]!, 10), hash: "" };
   }
 
   throw new Error(`Invalid line reference: ${ref}`);
@@ -154,7 +154,7 @@ export function applyHashlineEdits(
     switch (edit.spec.kind) {
       case "single": {
         const { ref, dst } = edit.spec;
-        const actualLine = fileLines[ref.line - 1];
+        const actualLine = fileLines[ref.line - 1]!;
         const actualHash = computeLineHash(ref.line, actualLine);
 
         if (actualHash !== ref.hash) {
@@ -182,7 +182,7 @@ export function applyHashlineEdits(
         const { start, end, dst } = edit.spec;
 
         // Validate start hash
-        const startLine = fileLines[start.line - 1];
+        const startLine = fileLines[start.line - 1]!;
         const startHash = computeLineHash(start.line, startLine);
         if (startHash !== start.hash) {
           warnings.push(
@@ -192,7 +192,7 @@ export function applyHashlineEdits(
         }
 
         // Validate end hash
-        const endLine = fileLines[end.line - 1];
+        const endLine = fileLines[end.line - 1]!;
         const endHash = computeLineHash(end.line, endLine);
         if (endHash !== end.hash) {
           warnings.push(
@@ -213,7 +213,7 @@ export function applyHashlineEdits(
 
       case "insertAfter": {
         const { after, dst } = edit.spec;
-        const actualLine = fileLines[after.line - 1];
+        const actualLine = fileLines[after.line - 1]!;
         const actualHash = computeLineHash(after.line, actualLine);
 
         if (actualHash !== after.hash) {
