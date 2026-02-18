@@ -297,16 +297,49 @@ if (diffLineCount > edits.length * 4) {
 
 ---
 
-### 7. Diff Generation (NOT Required for OpenCode)
+### 7. Diff Generation (PARTIALLY Required - Hashline Diff IS Present)
+
+**Important:** There IS a hashline-specific diff function in oh-my-pi:
+
+```typescript
+/**
+ * Compute the diff for a hashline operation without applying it.
+ * Used for preview rendering in the TUI before hashline-mode edits execute.
+ */
+export async function computeHashlineDiff(
+  input: { path: string; edits: HashlineEdit[] },
+  cwd: string,
+): Promise<DiffResult | DiffError>
+```
+
+**How it works:**
+1. Takes hashline edit operations as input
+2. Reads the original file content
+3. Applies `applyHashlineEdits()` to get the new content
+4. Calls `generateDiffString(old, new)` to produce a **standard unified diff**
+
+**The diff output format is NOT hashline format:**
+- Uses standard unified diff with `+`, `-`, and ` ` prefixes
+- Line numbers are shown (e.g., `  42|content`)
+- NO hashline prefixes like `42:a3|content`
+
+**Standard diff functions (not hashline-specific):**
 
 ```typescript
 export function generateDiffString(oldContent: string, newContent: string): DiffResult
 export function generateUnifiedDiffString(oldContent: string, newContent: string): DiffResult
 ```
 
-**Use case:** Display changes to user after edit completes.
+**Use cases:**
+- `computeHashlineDiff` - Preview hashline edits before applying (TUI use)
+- `generateDiffString` - Show final changes to user (all edit modes)
+- `generateUnifiedDiffString` - Git-style diff without file headers
 
-**Required for OpenCode?** ❌ No - OpenCode's built-in tool output mechanism handles result display.
+**Required for OpenCode?** ⚠️ Partially
+- `computeHashlineDiff` - Could be useful for preview/validation
+- `generateDiffString` - Not strictly required (OpenCode handles output display)
+
+**Implementation complexity:** The diff functions use the `diff` npm library to generate standard unified diffs. The hashline-specific version is just a wrapper that applies edits first, then diffs the results.
 
 ---
 
@@ -508,6 +541,69 @@ If you want to enhance robustness, consider adding:
 3. Strip hashline prefixes (5-10 lines)
 
 These are **optional improvements**, not requirements.
+
+---
+
+## Clarification: Diff Generation and Hashlines
+
+**Question:** Does diff generation use hashlines in oh-my-pi?
+
+**Answer:** Partially - there IS a `computeHashlineDiff` function that accepts hashline edits as input.
+
+### How Hashline Diff Works
+
+```typescript
+/**
+ * Compute the diff for a hashline operation without applying it.
+ * Used for preview rendering in the TUI before hashline-mode edits execute.
+ */
+export async function computeHashlineDiff(
+  input: { path: string; edits: HashlineEdit[] },
+  cwd: string,
+): Promise<DiffResult | DiffError> {
+  // 1. Read the original file
+  // 2. Apply hashline edits using applyHashlineEdits()
+  // 3. Generate standard unified diff between old and new content
+  return generateDiffString(normalizedContent, result.content);
+}
+```
+
+### Key Points
+
+1. **Input format:** Uses hashline edit operations (`set_line`, `replace_lines`, `insert_after`)
+
+2. **Output format:** Standard unified diff with `+`, `-`, and ` ` prefixes - NOT hashline format
+
+   Example diff output:
+   ```
+   -  42|old content
+   +  42|new content
+   ```
+
+3. **Not hashline format:** The diff does NOT use `42:a3|old content` format - it uses standard line numbers
+
+4. **Purpose:** Preview functionality for TUI before applying edits
+
+### Standard Diff Functions
+
+The other diff functions are mode-agnostic and don't use hashlines:
+
+```typescript
+export function generateDiffString(oldContent: string, newContent: string): DiffResult
+export function generateUnifiedDiffString(oldContent: string, newContent: string): DiffResult
+```
+
+These generate standard unified diffs for any edit mode (replace, patch, or hashline).
+
+### Required for OpenCode?
+
+- `computeHashlineDiff` - ⚠️ Could be useful for preview/validation but not required
+- `generateDiffString` - ❌ Not required (OpenCode handles output display)
+
+**Implementation note:** If you want diff preview, the `computeHashlineDiff` function is straightforward to implement:
+- Read file
+- Apply `applyHashlineEdits()` (already have this)
+- Call a standard diff library like `diff` npm package
 
 ---
 
