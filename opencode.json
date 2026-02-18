@@ -1,6 +1,10 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "tools": { "serena": false },
+  "mcp": {
+    "serena": {
+      "enabled": false
+    }
+  },
   "agent": {
     "build": {
       "tools": { "edit": false },
