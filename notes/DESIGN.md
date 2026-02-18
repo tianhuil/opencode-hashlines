@@ -170,5 +170,7 @@ and it auto-installs at startup.
 
 ## References:
 
-- https://blog.can.ac/2026/02/12/the-harness-problem/
-- https://github.com/can1357/oh-my-pi
+- https://blog.can.ac/2026/02/12/the-harness-problem/: describes hashlines
+- https://github.com/can1357/oh-my-pi: should contain a hashlines implementaiton
+- https://opencode.ai/docs/plugins/: how to write an opencode plugin
+  
