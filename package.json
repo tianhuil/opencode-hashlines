@@ -2,6 +2,7 @@
   "name": "hashlines",
   "module": "index.ts",
   "type": "module",
+  "license": "MIT",
   "private": true,
   "devDependencies": {
     "@types/bun": "^1.3.9"
