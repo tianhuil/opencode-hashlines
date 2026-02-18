@@ -9,6 +9,7 @@ import type { Plugin } from "@opencode-ai/plugin";
 import { tool } from "@opencode-ai/plugin";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { resolve } from "path";
+import { z } from "zod";
 
 // Import core hashline functions from lib
 import { computeLineHash, formatHashLines, parseLineRef, applyHashlineEdits, detectLineEnding, normalizeToLF, stripBom } from "../../lib/hashline.js";
@@ -24,9 +25,9 @@ export const HashlinePlugin: Plugin = async (ctx) => {
           "Pass these hashes to hashedit when editing — they serve as stable anchors. " +
           "Prefer this over the built-in read tool.",
         args: {
-          path: { type: "string", description: "File path relative to working directory" },
-          start_line: { type: "number", optional: true, description: "First line (1-based)" },
-          end_line: { type: "number", optional: true, description: "Last line (1-based, inclusive)" },
+          path: tool.schema.string().describe("File path relative to working directory"),
+          start_line: tool.schema.number().optional().describe("First line (1-based)"),
+          end_line: tool.schema.number().optional().describe("Last line (1-based, inclusive)"),
         },
         async execute(args, context) {
           const filePath = resolve(context.directory, args.path);
@@ -54,48 +55,34 @@ export const HashlinePlugin: Plugin = async (ctx) => {
           "Hash mismatches are rejected — re-read first if that happens. " +
           "Prefer this over the built-in edit tool.",
         args: {
-          path: { type: "string", description: "File path" },
-          operations: {
-            type: "array",
-            description: "Edit operations to apply",
-            items: {
-              type: "object",
-              anyOf: [
-                {
-                  description: "Replace a single line",
-                  properties: {
-                    op: { const: "set_line", description: "Single line replacement" },
-                    line: { type: "number", description: "Line number" },
-                    hash: { type: "string", description: "2-char hash of current content" },
-                    new_text: { type: "string", description: "New line content (empty to delete)" },
-                  },
-                  required: ["op", "line", "hash", "new_text"],
-                },
-                {
-                  description: "Replace a range of lines",
-                  properties: {
-                    op: { const: "replace_lines", description: "Range replacement" },
-                    start_line: { type: "number", description: "Start line number" },
-                    start_hash: { type: "string", description: "Hash of start line" },
-                    end_line: { type: "number", description: "End line number" },
-                    end_hash: { type: "string", description: "Hash of end line" },
-                    new_content: { type: "string", description: "New content (empty to delete)" },
-                  },
-                  required: ["op", "start_line", "start_hash", "end_line", "end_hash", "new_content"],
-                },
-                {
-                  description: "Insert content after a line",
-                  properties: {
-                    op: { const: "insert_after", description: "Insert after line" },
-                    line: { type: "number", description: "Line number to insert after" },
-                    hash: { type: "string", description: "Hash of anchor line" },
-                    new_content: { type: "string", description: "Content to insert" },
-                  },
-                  required: ["op", "line", "hash", "new_content"],
-                },
-              ],
-            },
-          },
+          path: tool.schema.string().describe("File path"),
+          operations: tool.schema.array(
+            z.discriminatedUnion("op", [
+              // set_line operation
+              z.object({
+                op: z.literal("set_line").describe("Single line replacement"),
+                line: z.number().describe("Line number"),
+                hash: z.string().describe("2-char hash of current content"),
+                new_text: z.string().describe("New line content (empty to delete)"),
+              }),
+              // replace_lines operation
+              z.object({
+                op: z.literal("replace_lines").describe("Range replacement"),
+                start_line: z.number().describe("Start line number"),
+                start_hash: z.string().describe("Hash of start line"),
+                end_line: z.number().describe("End line number"),
+                end_hash: z.string().describe("Hash of end line"),
+                new_content: z.string().describe("New content (empty to delete)"),
+              }),
+              // insert_after operation
+              z.object({
+                op: z.literal("insert_after").describe("Insert after line"),
+                line: z.number().describe("Line number to insert after"),
+                hash: z.string().describe("Hash of anchor line"),
+                new_content: z.string().describe("Content to insert"),
+              }),
+            ])
+          ).describe("Edit operations to apply"),
         },
         async execute(args, context) {
           const filePath = resolve(context.directory, args.path);
@@ -166,19 +153,19 @@ export const HashlinePlugin: Plugin = async (ctx) => {
 
     // --- Intercept built-in read calls and upgrade them to hashread output ---
     "tool.execute.after": async (input, output) => {
-      if (input.tool === "read" && typeof output.result === "string") {
-        const lines = output.result.split("\n");
+      if (input.tool === "read" && typeof output.output === "string") {
+        const lines = output.output.split("\n");
 
         // If it looks like opencode already added line numbers (e.g. "  1 | code"), strip them
         // and re-render with hashes
         const hasLineNumbers = lines.some(line => /^\s*\d+\s*\|/.test(line));
 
-        let textToFormat = output.result;
+        let textToFormat = output.output;
         if (hasLineNumbers) {
           textToFormat = lines.map(line => line.replace(/^\s*\d+\s*\|/, "")).join("\n");
         }
 
-        output.result =
+        output.output =
           "⚠️ Use `hashread` instead of `read` for hash-anchored editing.\n\n" +
           formatHashLines(textToFormat);
       }
