@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+bun.lock
+
+# Build artifacts
+*.log
+
+# Development files
+.opencode/
+.cursor/
+.serena/
+.git/
+.gitignore
+
+# Source files (we only publish dist/)
+lib/
+index.ts
+tsconfig.json
+
+# Notes and documentation
+notes/
+notes/**
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
