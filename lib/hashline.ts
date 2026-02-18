@@ -16,19 +16,10 @@ const DICT = Array.from({ length: HASH_MOD }, (_, i) =>
   i.toString(RADIX).padStart(HASH_LEN, "0")
 );
 
-// Simple DJB2 hash as a portable alternative to xxHash32
-function simpleHash(str: string): number {
-  let hash = 5381;
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) + hash) + str.charCodeAt(i); // hash * 33 + c
-  }
-  return hash >>> 0; // Ensure unsigned 32-bit
-}
-
 /**
  * Compute a short hex hash of a single line.
  *
- * Uses a DJB2 hash on whitespace-normalized line, truncated to HASH_LEN
+ * Uses Bun's xxHash32 on a whitespace-normalized line, truncated to HASH_LEN
  * hex characters. The idx parameter is accepted for compatibility but is
  * not currently mixed into the hash.
  */
@@ -38,7 +29,7 @@ export function computeLineHash(idx: number, line: string): string {
   }
   line = line.replace(/\s+/g, ""); // Normalize whitespace
   void idx; // Not used, kept for compatibility
-  return DICT[simpleHash(line) % HASH_MOD];
+  return DICT[Bun.hash.xxHash32(line) % HASH_MOD];
 }
 
 /**

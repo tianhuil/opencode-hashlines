@@ -28,9 +28,12 @@ hashlines/
 
 ### Core Library (`lib/hashline.ts`)
 
-Adapted from oh-my-pi with the following changes:
+Copied from oh-my-pi (kept original implementation):
 
-1. **Hash Algorithm**: Replaced Bun's `xxHash32` with a portable DJB2 hash implementation for broader compatibility
+1. **Hash Algorithm**: Uses Bun's native `xxHash32` for high performance
+   - Kept original Bun hash implementation since this is a Bun project
+   - The oh-my-pi note said this "can be replaced" but not "should be replaced"
+   - Native xxHash32 is significantly faster than JavaScript alternatives
 2. **Line Normalization**: Whitespace normalization before hashing (spaces/tabs don't affect hash)
 3. **Edit Operations**: Supports four operation types:
    - `set_line` - Replace single line
@@ -66,7 +69,7 @@ Minimal wrappers around the core library:
 ## Key Features
 
 1. **Stable Anchors**: Hashes detect file changes before edits are applied
-2. **Portability**: DJB2 hash works in any JavaScript runtime
+2. **Performance**: Uses Bun's native `xxHash32` for fast hash computation
 3. **Error Handling**: Clear error messages for hash mismatches
 4. **Backward Compatibility**: Hook intercepts built-in read as fallback
 

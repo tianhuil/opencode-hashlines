@@ -94,7 +94,7 @@ lib/
 
 ## Hash Algorithm
 
-The plugin uses a DJB2 hash on whitespace-normalized lines, truncated to 2 hex characters (256 possible values, ~0.4% collision rate). Whitespace normalization ensures that spacing differences don't cause hash mismatches.
+The plugin uses Bun's native `xxHash32` on whitespace-normalized lines, truncated to 2 hex characters (256 possible values, ~0.4% collision rate). Whitespace normalization ensures that spacing differences don't cause hash mismatches.
 
 ## Error Handling
 
