@@ -12,8 +12,8 @@ import { resolve } from "path";
 import { z } from "zod";
 
 // Import core hashline functions from lib
-import { computeLineHash, formatHashLines, parseLineRef, applyHashlineEdits, detectLineEnding, normalizeToLF, stripBom } from "../../lib/hashline.js";
-import type { HashlineEdit } from "../../lib/types.js";
+import { computeLineHash, formatHashLines, parseLineRef, applyHashlineEdits, detectLineEnding, normalizeToLF, stripBom } from "./lib/hashline.js";
+import type { HashlineEdit } from "./lib/types.js";
 
 export const HashlinePlugin: Plugin = async (ctx) => {
   return {

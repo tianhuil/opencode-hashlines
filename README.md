@@ -12,11 +12,85 @@ The hashline system provides stable anchors that detect file changes before edit
 
 ## Installation
 
+### Install via npm
+
+```bash
+# Install the package
+npm install @tianhuil/opencode-hashlines
+```
+
+### Add to OpenCode
+
+To use this plugin with OpenCode, you need to:
+
+1. **Install the plugin in your OpenCode project:**
+   ```bash
+   npm install @tianhuil/opencode-hashlines
+   ```
+
+2. **Update your OpenCode configuration** (`opencode.json`):
+   
+   ```json
+   {
+     "$schema": "https://opencode.ai/config.json",
+     "plugins": ["@tianhuil/opencode-hashlines"],
+     "agent": {
+       "build": {
+         "tools": { "edit": false },
+         "prompt": "Always use `hashread` to read files and `hashedit` to edit them. Never use `edit` or `str_replace`. The hashread output format is `N:hh|line` — pass those hashes back to hashedit as anchors."
+       }
+     }
+   }
+   ```
+
+   The key configuration change is setting `"tools": { "edit": false }` which disables OpenCode's built-in edit tool, forcing it to use the hash-anchored editing provided by this plugin.
+
+3. **Restart OpenCode** to load the new plugin configuration.
+
+### Why disable the built-in edit tool?
+
+OpenCode's default `edit` tool uses simple line number references that can become stale when files change. This plugin replaces it with `hashread` and `hashedit`, which use content hashes to verify file integrity before applying edits, preventing corruption from outdated line references.
+
+## Development
+
+### Project Structure
+
+All plugin code lives in the `src/` directory:
+
+```
+src/
+├── hashline-plugin.ts    # Main plugin entry point
+└── lib/
+    ├── hashline.ts        # Core hashline functions
+    ├── schema.ts          # Zod validation schemas
+    └── types.ts           # TypeScript types
+```
+
+### Local Testing with Symlink
+
+For local development, the `.opencode/plugins/hashline-plugin.ts` is a symlink to `../src/hashline-plugin.ts`. This allows you to:
+
+1. Edit code in `src/`
+2. Changes are immediately available to OpenCode without rebuilding
+3. Build only needed when publishing to npm
+
+The symlink is created automatically. If it breaks, recreate it:
+
+```bash
+ln -s ../src/hashline-plugin.ts .opencode/plugins/hashline-plugin.ts
+```
+
+### Building
+
 ```bash
 # Install dependencies
 bun install
 
-# The plugin is automatically loaded through OpenCode's plugin system
+# Build the package (outputs to dist/)
+bun run build
+
+# Type checking
+bun run typecheck
 ```
 
 ## Usage
@@ -80,5 +154,3 @@ Four edit operations are supported:
 - [oh-my-pi](https://github.com/can1357/oh-my-pi) - Original implementation
 - [OpenCode Plugins](https://opencode.ai/docs/plugins/) - Plugin documentation
 ## License
-
-This project is private.

@@ -13,9 +13,10 @@ bun.lock
 .gitignore
 
 # Source files (we only publish dist/)
-lib/
+src/
 index.ts
 tsconfig.json
+tsconfig.build.json
 
 # Notes and documentation
 notes/

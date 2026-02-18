@@ -29,7 +29,7 @@ export function computeLineHash(idx: number, line: string): string {
   }
   line = line.replace(/\s+/g, ""); // Normalize whitespace
   void idx; // Not used, kept for compatibility
-  return DICT[Bun.hash.xxHash32(line) % HASH_MOD];
+  return DICT[Bun.hash.xxHash32(line) % HASH_MOD] ?? "00";
 }
 
 /**
