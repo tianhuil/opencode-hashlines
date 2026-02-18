@@ -53,19 +53,19 @@ src/
     └── types.ts          # TypeScript types
 ```
 
-### Local Testing with Symlink
+### Local Testing with Shim
 
-For local development, the `.opencode/plugins/hashline-plugin.ts` is a symlink to `../src/hashline-plugin.ts`. This allows you to:
+For local development, the `.opencode/plugins/shim.ts` re-exports the plugin from `src/`:
+
+```typescript
+export {HashlinePlugin} from '../../src/hashline-plugin';
+```
+
+This allows you to:
 
 1. Edit code in `src/`
 2. Changes are immediately available to OpenCode without rebuilding
 3. Build only needed when publishing to npm
-
-The symlink is created automatically. If it breaks, recreate it:
-
-```bash
-ln -s ../src/hashline-plugin.ts .opencode/plugins/hashline-plugin.ts
-```
 
 ### Building
 
