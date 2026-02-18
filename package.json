@@ -8,5 +8,9 @@
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "dependencies": {
+    "@opencode-ai/plugin": "^1.2.6",
+    "zod": "^4.3.6"
   }
 }
