@@ -2,6 +2,8 @@
 
 A plugin for OpenCode that provides hash-anchored file reading and editing to prevent corruption from stale line references.
 
+See [The Harness Problem](https://blog.can.ac/2026/02/12/the-harness-problem/).
+
 ## Overview
 
 The hashlines plugin implements a line-addressed edit format using content hashes called **hashlines**. Each line is identified by a `LINE:HASH` reference where:
