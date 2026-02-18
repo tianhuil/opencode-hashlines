@@ -2,6 +2,8 @@
  * Zod schemas for hashline tool validation.
  *
  * These schemas define the expected input format for hashread and hashedit tools.
+ * 
+ * **NOTE** not used but prserved for reference.
  */
 
 import { z } from "zod";
