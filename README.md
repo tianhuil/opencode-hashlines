@@ -12,40 +12,25 @@ The hashline system provides stable anchors that detect file changes before edit
 
 ## Installation
 
-### Install via npm
+Add the plugin to your `opencode.json` config file:
 
-```bash
-# Install the package
-npm install @tianhuil/opencode-hashlines
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["@tianhuil/opencode-hashlines"],
+  "agent": {
+    "build": {
+      "tools": { "edit": false },
+      "prompt": "Always use `hashread` to read files and `hashedit` to edit them. Never use `edit` or `str_replace`. The hashread output format is `N:hh|line` — pass those hashes back to hashedit as anchors."
+    }
+  }
+}
 ```
 
-### Add to OpenCode
+OpenCode will automatically install the plugin at startup. The key configuration change is setting `"tools": { "edit": false }` which disables OpenCode's built-in edit tool, forcing it to use the hash-anchored editing provided by this plugin.
 
-To use this plugin with OpenCode, you need to:
 
-1. **Install the plugin in your OpenCode project:**
-   ```bash
-   npm install @tianhuil/opencode-hashlines
-   ```
-
-2. **Update your OpenCode configuration** (`opencode.json`):
-   
-   ```json
-   {
-     "$schema": "https://opencode.ai/config.json",
-     "plugins": ["@tianhuil/opencode-hashlines"],
-     "agent": {
-       "build": {
-         "tools": { "edit": false },
-         "prompt": "Always use `hashread` to read files and `hashedit` to edit them. Never use `edit` or `str_replace`. The hashread output format is `N:hh|line` — pass those hashes back to hashedit as anchors."
-       }
-     }
-   }
-   ```
-
-   The key configuration change is setting `"tools": { "edit": false }` which disables OpenCode's built-in edit tool, forcing it to use the hash-anchored editing provided by this plugin.
-
-3. **Restart OpenCode** to load the new plugin configuration.
+Restart OpenCode to load the new plugin configuration.
 
 ### Why disable the built-in edit tool?
 
